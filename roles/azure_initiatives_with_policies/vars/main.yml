@@ -1,0 +1,4 @@
+---
+# vars file for azure_initiatives_with_policies
+
+initiatives_policies_dir: azure_initiatives_with_policies

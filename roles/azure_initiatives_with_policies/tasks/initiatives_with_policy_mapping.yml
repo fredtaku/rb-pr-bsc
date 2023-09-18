@@ -1,0 +1,59 @@
+---
+    - name: Fetch all Azure initiatives
+      command: | 
+                az policy set-definition list --query "[].{id: id, name: name, displayName: displayName, policyDefinitions: policyDefinitions}" --output json
+      register: azure_initiatives_output
+
+
+    - name: Create initiatives policies folder
+      file:
+          path: "{{initiatives_policies_dir}}"
+          state: directory
+
+
+
+
+    - name: Prepare a list with each initiative tagged with its policy definitions
+      set_fact:
+        azure_initiatives_with_policies: >-
+          {{
+            azure_initiatives_with_policies|default([]) +
+            [{
+              'initiative_id': item.id,
+              'initiative_display_name': item.displayName,
+              'initiative_name': item.name,
+              'policy_definitions': (item.policyDefinitions | default([])) | map(attribute='policyDefinitionId') | list
+            }]
+          }}
+      with_items: "{{ azure_initiatives_output.stdout | from_json }}"
+      
+
+##    - name: Print display names
+#      debug:
+#         #msg: "{{azure_initiatives_with_policies | json_query('[*].initiative_display_name')}}"
+#         msg: "{{azure_initiatives_with_policies | selectattr('initiative_display_name', 'defined') | items2dict(key_name='initiative_display_name', value_name='policy_definitions') }}"
+
+    #- name: Write the output to a JSON file
+    #  copy:
+    #    content: "{{ azure_initiatives_with_policies | to_nice_json }}"
+    #    dest: "azure_initiatives_with_policies.json"
+#   #     content: "{{azure_initiatives_with_policies | selectattr('initiative_display_name', 'defined') | items2dict(key_name='initiative_display_name', value_name='policy_definitions') |to_nice_json }}"
+#   #     dest: "azure_initiatives_with_policies.json"
+#
+#    - name: SET SOME FACTS
+#      set_fact:
+#         display_name: "{{azure_initiatives_with_policies | selectattr('initiative_display_name', 'defined') | items2dict(key_name='initiative_display_name', value_name='policy_definitions') |to_nice_json }}"
+#       
+#
+#    - name: Print display names
+#      debug: 
+#         msg: "{{display_name |type_debug}}"
+#
+    - name: Include a group of tasks
+      include_tasks: policy_block_file.yml
+      loop: "{{ azure_initiatives_with_policies  |subelements('policy_definitions') }}"
+
+    - name: Loop through each initiative_display_name and its policy_definitions
+      debug:
+        msg: "Initiative: {{ item.0.initiative_display_name }}, Policy Definition: {{ item.1 | basename }}"
+      loop: "{{ azure_initiatives_with_policies  |subelements('policy_definitions') }}"

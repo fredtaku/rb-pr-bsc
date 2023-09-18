@@ -1,0 +1,9 @@
+---
+- name: Export Azure Policies and group by initiative
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+   - name: Call the role azure initiatives with policies
+     include_role: 
+            name: azure_initiatives_with_policies

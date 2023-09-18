@@ -1,0 +1,39 @@
+#- name: Create marker with category
+#  ansible.builtin.lineinfile:
+#    path: "{{my_path}}"
+#    state: present
+#    line: "#{{ item.1 }}"
+#    create: yes
+#
+- name: Export the policy and register it
+  command: |    
+            az policy definition show --name "{{item.1 |basename}}" --output json
+  register: policy_def
+
+#    - name: Loop thro:ugh each initiative_display_name and its policy_definitions
+#      debug:
+#        msg: "Initiative: {{ item.0.initiative_display_name }}, Policy Definition: {{ item.1 }}"
+#      loop: "{{ azure_initiatives_with_policies  |subelements('policy_definitions') }}"
+#
+#- name: copy policy_def  to {{my_path}}
+#  lineinfile:
+#    line: "{{ policy_def }}"
+#    dest: "{{ my_path }}"
+#
+#- name: Create marker with policy Id
+#  lineinfile:
+#    path: "{{my_path}}"
+#    state: present
+#    line: "#{{ item.2 }}"
+#
+
+- name: create block and write to policy file
+  blockinfile:
+      marker: '{mark}'
+      marker_begin: "\n#{{item.1 | basename}}"
+      #marker_end: "\n{{ item.0.initiative_display_name }}"
+      marker_end: "\n#{{item.1 | basename}}"
+      path: "{{initiatives_policies_dir}}/{{item.0.initiative_display_name}}/{{item.1 |basename}}"
+      block: "{{policy_def.stdout | to_nice_json }}"
+      create: yes
+      
