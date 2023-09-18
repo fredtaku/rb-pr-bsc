@@ -1,0 +1,4 @@
+---
+# tasks file for export_azure_data
+
+- import_tasks: get_azure_policy_data.yml

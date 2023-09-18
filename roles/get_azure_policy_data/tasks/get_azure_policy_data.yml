@@ -1,0 +1,25 @@
+---
+    - name: Fetch all Azure policy definitions
+      command: |
+                az policy definition list --query "[].{display_name: displayName, id: id, name: name, category: metadata.category}" --output json
+      register: azure_policies_output
+
+    - name: Prepare policy metadata info
+      set_fact:
+        azure_policies_data: >-
+          {{
+            azure_policies_data|default([]) + 
+            [{
+              'display_name': item.display_name,
+              'policy_id': item.id,
+              'policy_name': item.name,
+              'category': item.category
+            }]
+          }}
+      with_items: "{{ azure_policies_output.stdout | from_json }}"
+
+    - name: Write the output to a JSON file
+      copy:
+        content: "{{ azure_policies_data | to_nice_json }}"
+        dest: "{{azure_policies_data_file}}"
+

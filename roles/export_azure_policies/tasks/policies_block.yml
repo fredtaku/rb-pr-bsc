@@ -1,0 +1,32 @@
+#- name: Create marker with category
+#  ansible.builtin.lineinfile:
+#    path: "{{my_path}}"
+#    state: present
+#    line: "#{{ item.1 }}"
+#    create: yes
+#
+- name: Export the policy and register it
+  command: |    
+            az policy definition show --name "{{item.0}}" --output json
+  register: my_var
+
+
+- name: Creating folder - name "{{item.1}}" if not exist
+  file:
+    path: "{{policies_folder}}/{{item.1}}"
+    state: directory
+    recurse: yes
+
+
+- name: create block 
+  blockinfile:
+      marker: '{mark}'
+      marker_begin: "\n#{{item.1}}"
+      marker_end: "\n#{{item.0}}"
+      path: "{{policies_folder}}/{{item.1}}/{{item.0}}"
+      #block: "{{my_var.stdout_lines | json_query('[]') | to_nice_json }}"
+      #block: "{{my_var.stdout_lines[:] | to_nice_json }}"
+      #block: "{{my_var.stdout_lines | to_nice_json }}"
+      block: "{{my_var.stdout | to_nice_json }}"
+      create: yes
+      

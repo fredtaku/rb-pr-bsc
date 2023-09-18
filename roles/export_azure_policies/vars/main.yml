@@ -1,0 +1,6 @@
+---
+# vars file for export_azure_policies
+#path: azure_policies.json
+policies_folder: policies
+#json_data: azure_policies_with_categories.json
+data_file: "azure_policies_data"

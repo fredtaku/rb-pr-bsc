@@ -1,0 +1,31 @@
+#- hosts: localhost
+#  gather_facts: no
+#  become: yes
+#  vars:
+#     - my_path: "policies_with_categories"
+#     - policies_folder: "policies"
+#  tasks: 
+#   
+        - name: lookup json file
+          set_fact:
+            my_json_data: "{{lookup('file', 'azure_policies_with_categories.json') }}" 
+
+        - name: Print categories
+          set_fact:
+            policy_category: "{{ my_json_data | json_query('[*].category') }}"
+            policy_display_name: "{{ my_json_data | json_query('[*].display_name') }}"
+            policy_id: "{{ my_json_data | json_query('[*].policy_id') }}"
+            policy_name: "{{ my_json_data | json_query('[*].policy_name') }}"
+
+        - name: Include a group of tasks
+          include_tasks: my_block.yml
+          with_together:
+               - "{{ policy_name }}"
+               - "{{ policy_category }}"
+               - "{{ policy_id }}"
+
+
+
+
+
+

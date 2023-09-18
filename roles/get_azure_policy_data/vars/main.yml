@@ -1,0 +1,3 @@
+---
+# vars file for export_azure_data
+data_file: "azure_policies_data"
