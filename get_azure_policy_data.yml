@@ -1,0 +1,11 @@
+---
+- name: Get Azure Policies Data
+  hosts: localhost
+  gather_facts: no
+  vars:
+     - azure_policies_data_file: "files/{{data_file}}.json"
+
+  tasks:
+   - name: get azure policy data role
+     include_role: 
+            name: get_azure_policy_data
