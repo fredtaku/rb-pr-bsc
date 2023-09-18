@@ -1,0 +1,25 @@
+---
+- name: Export Azure Policies and Tag by Category
+  hosts: localhost
+  gather_facts: no
+  vars:
+     - data_file: "azure_policies_data"
+     - policies_folder: "policies"
+     - azure_policies_data_file: "files/{{data_file}}.json"
+
+
+  tasks:
+
+   - name: Create policies folder if not exists
+     file:
+       path: "{{policies_folder}}"
+       state: directory
+
+  
+   - name: lookup json file
+     set_fact:
+        my_json_data: "{{lookup('file',azure_policies_data_file)}}"
+
+   - name: export  azure policies and write to folder by categories
+     include_role: 
+            name: export_azure_policies
